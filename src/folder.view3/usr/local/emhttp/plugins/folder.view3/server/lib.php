@@ -215,6 +215,23 @@
             $assignedContainers = array_merge($assignedContainers, $members);
         }
 
+        // Nesting (max. one level) is invisible to Unraid's real autostart file: a nested
+        // child folder's containers are pulled depth-first into its parent's block (children
+        // first, then the parent's own containers), so boot order is correct regardless of
+        // drag/save history. The child's own placeholder is zeroed out afterward so its
+        // containers aren't emitted twice — this only affects what gets written to the
+        // autostart file, not docker.json or what FV3 renders on screen.
+        foreach ($folders as $folderId => $folder) {
+            $parentId = $folder['parentId'] ?? null;
+            if (empty($parentId)) { continue; }
+            $childKey = "folder-$folderId";
+            $parentKey = "folder-$parentId";
+            if (!isset($folderContainers[$parentKey])) { continue; } // parent missing/invalid, leave child as-is
+            $childContainers = $folderContainers[$childKey] ?? [];
+            $folderContainers[$parentKey] = array_merge($childContainers, $folderContainers[$parentKey]);
+            $folderContainers[$childKey] = [];
+        }
+
         // Build $currentOrder. Source:
         //   - userprefs.cfg if it exists (user has drag-reordered at some point)
         //   - otherwise alphabetical intermix of folder names + orphan containers (matches the
@@ -332,6 +349,22 @@
             exit;
         }
         $fileData = fv3_read_json("$configDir/$type.json");
+
+        // Nesting is capped at one level: a folder can't be its own parent, and a folder
+        // that is itself nested can't be chosen as a parent (no grandchildren).
+        $parentId = $decoded['parentId'] ?? null;
+        if (!empty($parentId)) {
+            if ($parentId === $id) {
+                http_response_code(400);
+                exit;
+            }
+            $parent = $fileData[$parentId] ?? null;
+            if ($parent === null || !empty($parent['parentId'])) {
+                http_response_code(400);
+                exit;
+            }
+        }
+
         $fileData[$id] = $decoded;
         $path = "$configDir/$type.json";
         fv3_atomic_write($path, json_encode($fileData));
@@ -375,6 +408,14 @@
         if(!file_exists("$configDir/$type.json")) { createFile($type); return; }
         $fileData = fv3_read_json("$configDir/$type.json");
         unset($fileData[$id]);
+        // Deleting a folder that has nested children promotes them back to top-level
+        // instead of leaving them with a dangling parentId (which would hide them).
+        foreach ($fileData as $fid => &$folder) {
+            if (($folder['parentId'] ?? null) === $id) {
+                $folder['parentId'] = null;
+            }
+        }
+        unset($folder);
         $path = "$configDir/$type.json";
         fv3_atomic_write($path, json_encode($fileData));
     }

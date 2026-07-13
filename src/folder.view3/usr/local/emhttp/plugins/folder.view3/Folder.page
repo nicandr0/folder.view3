@@ -66,6 +66,23 @@ Markdown="false"
 
             <div class="basic">
                 <dl>
+                    <dt data-i18n="parent-folder">Parent folder:</dt>
+                    <dd>
+                        <img class="img" style="visibility: hidden;">
+                        <select name="parentId">
+                            <option value="" data-i18n="parent-folder-none">(None — top level)</option>
+                        </select>
+                    </dd>
+                </dl>
+                <blockquote class="inline_help">
+                    <p data-i18n="[html]parent-folder-tooltip">
+                        Nest this folder inside another one. Only one level deep is supported — a folder that is already nested cannot itself be chosen as a parent, and won't appear in this list.
+                    </p>
+                </blockquote>
+            </div>
+
+            <div class="basic">
+                <dl>
                     <dt data-i18n="folder-webui">Folder WebUI:</dt>
                     <dd>
                         <img class="img" style="visibility: hidden;">

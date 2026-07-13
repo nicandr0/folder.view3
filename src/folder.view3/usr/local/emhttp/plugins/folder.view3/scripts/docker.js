@@ -12,6 +12,39 @@ let folderobserverConfig = {
 };
 let folderReq = [];
 
+// Nested folders (max. one level deep): purely a post-render DOM pass. Every folder,
+// nested or not, still gets rendered as its own normal top-level row by the existing
+// order/sortable pipeline above — this just physically relocates a child folder's row
+// to sit directly under its parent's row, strips it from the draggable top-level
+// sortable set, and appends a subfolder/container count to the parent's status badge.
+// Autostart/boot-order correctness for nested folders is handled separately, server-side,
+// in lib.php::syncContainerOrder() — this function only affects what's on screen.
+const fv3ApplyNesting = (allFolders) => {
+    const $list = $('#docker_list');
+    Object.entries(allFolders).forEach(([id, folder]) => {
+        if (!folder.parentId || !allFolders[folder.parentId]) return;
+        const $child = $list.find(`tr.folder-id-${id}`);
+        const $parent = $list.find(`tr.folder-id-${folder.parentId}`);
+        if (!$child.length || !$parent.length) return;
+        fv3Debug('fv3ApplyNesting', `Nesting folder ${id} under ${folder.parentId}`);
+        $child.removeClass('sortable ui-sortable-handle').addClass('folder-nested');
+        const $lastNestedSibling = $parent.nextUntil(':not(.folder-nested)').last();
+        ($lastNestedSibling.length ? $lastNestedSibling : $parent).after($child);
+    });
+
+    Object.entries(allFolders).forEach(([id, folder]) => {
+        const childIds = Object.entries(allFolders)
+            .filter(([, f]) => f.parentId === id)
+            .map(([cid]) => cid);
+        if (!childIds.length) return;
+        const $state = $list.find(`tr.folder-id-${id} .folder-state`);
+        if (!$state.length || $state.data('fv3NestSuffixed')) return;
+        $state.data('fv3NestSuffixed', true);
+        const label = childIds.length === 1 ? 'subfolder' : 'subfolders';
+        $state.append(` · ${childIds.length} ${label}`);
+    });
+};
+
 // Folder rendering — orchestrate (createFolders) and per-folder build (createFolder)
 const createFolders = async () => {
     fv3Debug('createFolders', 'Entry');
@@ -165,6 +198,8 @@ const createFolders = async () => {
             dropDownButton(id);
         }
     }
+
+    fv3ApplyNesting(foldersDone);
 
     try { $('#docker_list').sortable('refresh'); } catch(e) {}
 

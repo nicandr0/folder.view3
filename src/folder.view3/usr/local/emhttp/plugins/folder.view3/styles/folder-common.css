@@ -137,6 +137,26 @@ body[data-fv3-unraid="modern"] div.title {
     width: 100%;
 }
 
+/* Nested folders (max. one level): indent + a subtle tint so a subfolder row reads as
+   belonging to the folder directly above it, without a whole second visual language. */
+tr.folder-nested {
+    background: color-mix(in srgb, currentColor 4%, transparent);
+}
+tr.folder-nested .folder-name-sub {
+    padding-left: 28px;
+    position: relative;
+}
+tr.folder-nested .folder-name-sub::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: currentColor;
+    opacity: 0.25;
+}
+
 .folder .folder-hand > .folder-img {
     width: var(--fv3-folder-icon-size, 48px);
     height: var(--fv3-folder-icon-size, 48px);

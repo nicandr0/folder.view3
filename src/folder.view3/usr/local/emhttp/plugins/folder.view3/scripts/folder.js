@@ -91,6 +91,20 @@ $('div.canvas > form')[0].preview_vertical_bars_color.value = rgbToHex($('body')
 
     choose = Object.values(fv3SafeParse(await $.get(`/plugins/folder.view3/server/read_info.php?type=${type}`).promise(), {})).map(typeFilter);
 
+    // Nesting is capped at one level: only folders that are themselves top-level
+    // (no parentId) are valid parent choices, and a folder can't be its own parent.
+    const parentSelect = $('div.canvas > form select[name="parentId"]')[0];
+    if (parentSelect) {
+        Object.entries(folders).forEach(([fid, f]) => {
+            if (fid === folderId) return;
+            if (f.parentId) return;
+            const opt = document.createElement('option');
+            opt.value = fid;
+            opt.textContent = f.name || `folder-${fid}`;
+            parentSelect.appendChild(opt);
+        });
+    }
+
     if (folderId) {
         const currFolder = folders[folderId];
         delete folders[folderId];
@@ -130,6 +144,7 @@ $('div.canvas > form')[0].preview_vertical_bars_color.value = rgbToHex($('body')
         form.override_default_actions.checked = currFolder.settings.override_default_actions;
         form.expand_dashboard.checked = currFolder.settings.expand_dashboard;
         form.regex.value = currFolder.regex;
+        if (form.parentId) form.parentId.value = currFolder.parentId || '';
         for (const ct of currFolder.containers) {
             const index = choose.findIndex((e) => e.Name === ct);
             if (index > -1) {
@@ -479,6 +494,7 @@ const submitForm = async (e) => {
             expand_dashboard: e.expand_dashboard.checked,
         },
         regex: e.regex.value.toString(),
+        parentId: e.parentId ? (e.parentId.value.toString() || null) : null,
         containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())],
         containerIds: type === 'vm' ? (() => {
             const ids = {};
