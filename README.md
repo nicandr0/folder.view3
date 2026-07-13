@@ -1,5 +1,7 @@
 # <img src="img/folder-icon.png" width="32" height="32" alt="FolderView3"> FolderView3 for Unraid 7+
 
+> **⚠️ This is `nicandr0/folder.view3`, branch `feature/nested-folders`** — a personal fork/prototype, not the upstream project and not upstreamed. It adds one level of folder-in-folder nesting on the **Docker tab only** (Parent folder dropdown in the folder editor, nested rows indented under their parent, real Unraid autostart order flattened depth-first). VM/Dashboard tabs are untouched. PHP/JS syntax-checked (`php -l`, `node --check`), but not yet tested against a live Unraid install — try it on a test system before relying on it for real container boot order. Upstream project and its README: [chodeus/folder.view3](https://github.com/chodeus/folder.view3).
+
 Organize your Docker containers and VMs into collapsible folders on the Docker, VM, and Dashboard tabs.
 
 ## Features
