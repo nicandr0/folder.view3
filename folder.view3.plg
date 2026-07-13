@@ -1,13 +1,13 @@
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "folder.view3">
-<!ENTITY author "chodeus">
+<!ENTITY author "nicandr0">
 <!ENTITY github "&author;/&name;">
 <!ENTITY launch "Settings/FolderView3">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
-<!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2026.07.08">
-<!ENTITY md5 "1da6b7d7ef3032b096a36184d8e58054">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/feature/nested-folders/&name;.plg">
+<!ENTITY version "2026.07.13">
+<!ENTITY md5 "feda54a30f82939d80c51e60750fe26b">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/197223-plugin-folderview3/" min="7.0.0">
@@ -629,7 +629,7 @@ After updating, hard-refresh your browser (Ctrl/Cmd+Shift+R) and clear its cache
 
     <!-- New source file -->
     <FILE Name="/boot/config/plugins/&name;/&name;-&version;-x86_64-1.txz" Run="upgradepkg --install-new">
-        <URL>https://raw.githubusercontent.com/&github;/main/archive/&name;-&version;-x86_64-1.txz</URL>
+        <URL>https://raw.githubusercontent.com/&github;/feature/nested-folders/archive/&name;-&version;-x86_64-1.txz</URL>
         <MD5>&md5;</MD5>
     </FILE>
 
