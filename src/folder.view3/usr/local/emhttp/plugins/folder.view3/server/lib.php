@@ -351,7 +351,9 @@
         $fileData = fv3_read_json("$configDir/$type.json");
 
         // Nesting is capped at one level: a folder can't be its own parent, and a folder
-        // that is itself nested can't be chosen as a parent (no grandchildren).
+        // that is itself nested can't be chosen as a parent (no grandchildren). This also
+        // rules out A<->B cycles for free: if B is already nested under A, B can't then be
+        // chosen as A's parent, since B already fails the "already nested" check above.
         $parentId = $decoded['parentId'] ?? null;
         if (!empty($parentId)) {
             if ($parentId === $id) {
